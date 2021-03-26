@@ -10,6 +10,7 @@
 #include <climits>
 #include <cmath>
 #include <string>
+#include <thread>
 
 #include "BigInt.hpp"
 #include "constructors/constructors.hpp"
@@ -180,10 +181,16 @@ BigInt BigInt::operator*(const BigInt& num) const {
         num2_high = smaller.substr(0, half_length);
         num2_low = smaller.substr(half_length);
 
-        strip_leading_zeroes(num1_high.value);
-        strip_leading_zeroes(num1_low.value);
-        strip_leading_zeroes(num2_high.value);
-        strip_leading_zeroes(num2_low.value);
+        std::thread thread1(strip_leading_zeroes, std::ref(num1_high.value));
+        std::thread thread2(strip_leading_zeroes, std::ref(num1_low.value));
+        std::thread thread3(strip_leading_zeroes, std::ref(num2_high.value));
+        std::thread thread4(strip_leading_zeroes, std::ref(num2_low.value));
+        
+        thread1.join();
+        thread2.join();
+        thread3.join();
+        thread4.join();
+
 
         BigInt prod_high, prod_mid, prod_low;
         prod_high = num1_high * num2_high;
@@ -194,9 +201,13 @@ BigInt BigInt::operator*(const BigInt& num) const {
         add_trailing_zeroes(prod_high.value, 2 * half_length_ceil);
         add_trailing_zeroes(prod_mid.value, half_length_ceil);
 
-        strip_leading_zeroes(prod_high.value);
-        strip_leading_zeroes(prod_mid.value);
-        strip_leading_zeroes(prod_low.value);
+        std::thread thread5(strip_leading_zeroes, std::ref(prod_high.value));
+        std::thread thread6(strip_leading_zeroes, std::ref(prod_mid.value));
+        std::thread thread7(strip_leading_zeroes, std::ref(prod_low.value));
+
+        thread5.join();
+        thread6.join();
+        thread7.join();
 
         product = prod_high + prod_mid + prod_low;
     }
